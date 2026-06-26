@@ -1,3 +1,13 @@
+parameters:
+- name: environment
+  displayName: Environment
+  type: string
+  default: dev
+  values:
+  - dev
+  - uat
+  - prod
+
 trigger:
 - main
 
@@ -18,4 +28,5 @@ steps:
     echo "Agent OS: $(Agent.OS)"
     echo "Build Number: $(Build.BuildNumber)"
     echo "Application: $(appName)"
+    echo "Environment: ${{ parameters.environment }}"
   displayName: "Display Pipeline Information"
