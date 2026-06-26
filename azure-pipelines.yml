@@ -1,6 +1,9 @@
 trigger:
-- develop
+- main
 
+variables:
+  appName: enterprise-devops-lab
+  
 pool:
   vmImage: ubuntu-latest
 
@@ -14,4 +17,5 @@ steps:
     echo "Agent Name: $(Agent.Name)"
     echo "Agent OS: $(Agent.OS)"
     echo "Build Number: $(Build.BuildNumber)"
+    echo "Application: $(appName)"
   displayName: "Display Pipeline Information"
