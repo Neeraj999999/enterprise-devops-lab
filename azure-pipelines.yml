@@ -1,0 +1,17 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+
+- script: |
+    echo "===== Build Information ====="
+    echo "Repository: $(Build.Repository.Name)"
+    echo "Branch: $(Build.SourceBranch)"
+    echo "Commit: $(Build.SourceVersion)"
+    echo "Agent Name: $(Agent.Name)"
+    echo "Agent OS: $(Agent.OS)"
+    echo "Build Number: $(Build.BuildNumber)"
+  displayName: "Display Pipeline Information"
