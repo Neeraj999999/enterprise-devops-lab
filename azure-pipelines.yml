@@ -12,7 +12,11 @@ trigger:
 - main
 
 variables:
-  appName: enterprise-devops-lab
+- name: appName
+  value: enterprise-devops-lab
+
+- name: buildConfiguration
+  value: Release
   
 pool:
   vmImage: ubuntu-latest
@@ -28,5 +32,6 @@ steps:
     echo "Agent OS: $(Agent.OS)"
     echo "Build Number: $(Build.BuildNumber)"
     echo "Application: $(appName)"
+    echo "Configuration: $(buildConfiguration)"
     echo "Environment: ${{ parameters.environment }}"
   displayName: "Display Pipeline Information"
