@@ -7,6 +7,10 @@ parameters:
   - dev
   - uat
   - prod
+  
+- name: appName
+  type: string
+  default: my-default-app
 
 trigger:
 - main
@@ -32,6 +36,8 @@ steps:
     echo "Agent OS: $(Agent.OS)"
     echo "Build Number: $(Build.BuildNumber)"
     echo "Application: $(appName)"
+    echo "Variable App Name: $(appName)"
+    echo "Parameter App Name: ${{ parameters.appName }}"
     echo "Configuration: $(buildConfiguration)"
     echo "Environment: ${{ parameters.environment }}"
   displayName: "Display Pipeline Information"
