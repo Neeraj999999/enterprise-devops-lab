@@ -37,7 +37,7 @@ steps:
     echo "Build Number: $(Build.BuildNumber)"
     echo "Application: $(appName)"
     echo "Variable App Name: $(appName)"
-    echo "Parameter App Name: ${{ parameters.appName }}"
+    echo "Parameter App Name: ${{ parameters.appName123 }}"
     echo "Configuration: $(buildConfiguration)"
     echo "Environment: ${{ parameters.environment }}"
   displayName: "Display Pipeline Information"
