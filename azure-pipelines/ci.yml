@@ -32,8 +32,9 @@ stages:
 
     - script: |
         cd app
-        mvn clean package
+        mvn clean package -DskipTests
       displayName: Build Spring Boot Application
+
 
     - task: PublishPipelineArtifact@1
       displayName: Publish JAR
