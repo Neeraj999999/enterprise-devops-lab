@@ -9,9 +9,12 @@ pool:
 variables:
   imageName: enterprise-devops-lab
   imageTag: $(Build.BuildId)
+
   acrName: acrnmdevopslab01
   acrServiceConnection: acr-enterprise
+
   azureServiceConnection: azure-rm-enterprise
+
   resourceGroup: rg-enterprise-lab
   aksCluster: aks-enterprise
   namespace: petclinic
@@ -54,8 +57,8 @@ stages:
         command: buildAndPush
         containerRegistry: $(acrServiceConnection)
         repository: $(imageName)
-        Dockerfile: 'app/Dockerfile'
-        buildContext: '$(Build.SourcesDirectory)/app'
+        Dockerfile: app/Dockerfile
+        buildContext: $(Build.SourcesDirectory)/app
         tags: |
           $(imageTag)
           latest
@@ -68,7 +71,6 @@ stages:
   jobs:
 
   - job: Deploy
-
     displayName: Deploy Application
 
     steps:
@@ -83,16 +85,29 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
 
+          set -e
+
+          echo "Getting AKS credentials..."
+
           az aks get-credentials \
             --resource-group $(resourceGroup) \
             --name $(aksCluster) \
             --overwrite-existing
 
-          sed -i "s/IMAGE_TAG/$(imageTag)/g" kubernetes/deployment.yaml
+          echo "Preparing Kubernetes manifests..."
 
-          kubectl apply -f kubernetes/service.yaml
+          mkdir -p /tmp/k8s
 
-          kubectl apply -f kubernetes/deployment.yaml
+          cp kubernetes/*.yaml /tmp/k8s/
+
+          sed -i "s/IMAGE_TAG/$(imageTag)/g" /tmp/k8s/deployment.yaml
+
+          echo "Applying Kubernetes manifests..."
+
+          kubectl apply -f /tmp/k8s/
+
+          echo "Waiting for rollout..."
 
           kubectl rollout status deployment/enterprise-devops-lab \
-            -n $(namespace)
+            -n $(namespace) \
+            --timeout=300s
