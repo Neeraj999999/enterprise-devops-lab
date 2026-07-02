@@ -18,6 +18,7 @@ variables:
   resourceGroup: rg-enterprise-lab
   aksCluster: aks-enterprise
   namespace: petclinic
+  deploymentName: enterprise-devops-lab
 
 stages:
 
@@ -70,44 +71,50 @@ stages:
 
   jobs:
 
-  - job: Deploy
+  - deployment: Deploy
     displayName: Deploy Application
 
-    steps:
+    environment: DEV
 
-    - checkout: self
+    strategy:
+      runOnce:
+        deploy:
 
-    - task: AzureCLI@2
-      displayName: Deploy to AKS
-      inputs:
-        azureSubscription: $(azureServiceConnection)
-        scriptType: bash
-        scriptLocation: inlineScript
-        inlineScript: |
+          steps:
 
-          set -e
+          - checkout: self
 
-          echo "Getting AKS credentials..."
+          - task: AzureCLI@2
+            displayName: Deploy to AKS
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
 
-          az aks get-credentials \
-            --resource-group $(resourceGroup) \
-            --name $(aksCluster) \
-            --overwrite-existing
+                set -e
 
-          echo "Preparing Kubernetes manifests..."
+                echo "Getting AKS credentials..."
 
-          mkdir -p /tmp/k8s
+                az aks get-credentials \
+                  --resource-group $(resourceGroup) \
+                  --name $(aksCluster) \
+                  --overwrite-existing
 
-          cp kubernetes/*.yaml /tmp/k8s/
+                echo "Preparing Kubernetes manifests..."
 
-          sed -i "s/IMAGE_TAG/$(imageTag)/g" /tmp/k8s/deployment.yaml
+                mkdir -p /tmp/k8s
 
-          echo "Applying Kubernetes manifests..."
+                cp kubernetes/*.yaml /tmp/k8s/
 
-          kubectl apply -f /tmp/k8s/
+                sed -i "s/IMAGE_TAG/$(imageTag)/g" /tmp/k8s/deployment.yaml
 
-          echo "Waiting for rollout..."
+                echo "Applying Kubernetes manifests..."
 
-          kubectl rollout status deployment/enterprise-devops-lab \
-            -n $(namespace) \
-            --timeout=300s
+                kubectl apply -f /tmp/k8s/
+
+                echo "Waiting for rollout..."
+
+                kubectl rollout status deployment/$(deploymentName) \
+                  -n $(namespace) \
+                  --timeout=300s
