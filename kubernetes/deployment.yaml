@@ -20,8 +20,7 @@ spec:
     spec:
       containers:
       - name: enterprise-devops-lab
-        image: acrnmdevopslab01.azurecr.io/enterprise-devops-lab:v1
-
+        image: acrnmdevopslab01.azurecr.io/enterprise-devops-lab:IMAGE_TAG
         imagePullPolicy: Always
 
         ports:
