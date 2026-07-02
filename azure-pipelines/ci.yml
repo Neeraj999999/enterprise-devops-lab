@@ -9,7 +9,12 @@ pool:
 variables:
   imageName: enterprise-devops-lab
   imageTag: $(Build.BuildId)
+  acrName: acrnmdevopslab01
   acrServiceConnection: acr-enterprise
+  azureServiceConnection: azure-rm-enterprise
+  resourceGroup: rg-enterprise-lab
+  aksCluster: aks-enterprise
+  namespace: petclinic
 
 stages:
 
@@ -35,7 +40,7 @@ stages:
     - script: |
         cd app
         mvn clean package -DskipTests
-      displayName: Build Application
+      displayName: Build Spring Boot Application
 
     - task: PublishPipelineArtifact@1
       displayName: Publish JAR
@@ -54,3 +59,40 @@ stages:
         tags: |
           $(imageTag)
           latest
+
+- stage: Deploy
+  displayName: Deploy to AKS
+
+  dependsOn: Build
+
+  jobs:
+
+  - job: Deploy
+
+    displayName: Deploy Application
+
+    steps:
+
+    - checkout: self
+
+    - task: AzureCLI@2
+      displayName: Deploy to AKS
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+
+          az aks get-credentials \
+            --resource-group $(resourceGroup) \
+            --name $(aksCluster) \
+            --overwrite-existing
+
+          sed -i "s/IMAGE_TAG/$(imageTag)/g" kubernetes/deployment.yaml
+
+          kubectl apply -f kubernetes/service.yaml
+
+          kubectl apply -f kubernetes/deployment.yaml
+
+          kubectl rollout status deployment/enterprise-devops-lab \
+            -n $(namespace)
