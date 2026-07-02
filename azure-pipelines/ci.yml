@@ -1,0 +1,42 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+- group: enterprise-devops-lab
+
+stages:
+
+- stage: Build
+  displayName: Build Application
+
+  jobs:
+
+  - job: MavenBuild
+    displayName: Maven Build
+
+    steps:
+
+    - checkout: self
+
+    - task: JavaToolInstaller@0
+      displayName: Install Java 21
+      inputs:
+        versionSpec: '21'
+        jdkArchitectureOption: x64
+        jdkSourceOption: PreInstalled
+
+    - script: |
+        cd app
+        mvn clean package
+      displayName: Build Spring Boot Application
+
+    - task: PublishPipelineArtifact@1
+      displayName: Publish JAR
+      inputs:
+        targetPath: '$(Build.SourcesDirectory)/app/target'
+        artifact: springboot-jar
