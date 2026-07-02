@@ -7,17 +7,19 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-- group: enterprise-devops-lab
+  imageName: enterprise-devops-lab
+  imageTag: $(Build.BuildId)
+  acrServiceConnection: acr-enterprise
 
 stages:
 
 - stage: Build
-  displayName: Build Application
+  displayName: Build and Push Container
 
   jobs:
 
-  - job: MavenBuild
-    displayName: Maven Build
+  - job: Build
+    displayName: Build Spring Boot Application
 
     steps:
 
@@ -33,8 +35,7 @@ stages:
     - script: |
         cd app
         mvn clean package -DskipTests
-      displayName: Build Spring Boot Application
-
+      displayName: Build Application
 
     - task: PublishPipelineArtifact@1
       displayName: Publish JAR
@@ -43,11 +44,13 @@ stages:
         artifact: springboot-jar
 
     - task: Docker@2
-      displayName: Build Docker Image
+      displayName: Build and Push Docker Image
       inputs:
-        command: build
-        repository: enterprise-devops-lab
+        command: buildAndPush
+        containerRegistry: $(acrServiceConnection)
+        repository: $(imageName)
         Dockerfile: 'app/Dockerfile'
         buildContext: '$(Build.SourcesDirectory)/app'
         tags: |
-          $(Build.BuildId)
+          $(imageTag)
+          latest
