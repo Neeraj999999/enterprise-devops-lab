@@ -8,8 +8,8 @@ pool:
 
 variables:
   imageName: enterprise-devops-lab
-  imageTag: $(Build.BuildId)
-
+  imageTag: does-not-exist
+  
   acrName: acrnmdevopslab01
   acrServiceConnection: acr-enterprise
 
